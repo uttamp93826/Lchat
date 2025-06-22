@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #chat { border: 1px solid #ccc; height: 400px; overflow-y: scroll; padding: 10px; background: #f9f9f9; }
+    .msg { margin-bottom: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; background: #fff; }
+    .user { font-weight: bold; }
+    .time { font-size: 12px; color: #888; margin-top: 4px; display: block; }
+  </style>
+</head>
+<body>
+  <h2>💬 Chat Room</h2>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="Type your message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBP-uiChoUl6DExnwc9xvrCMj9Sbj72sg",
+      authDomain: "chat-ee464.firebaseapp.com",
+      databaseURL: "https://chat-ee464-default-rtdb.firebaseio.com",
+      projectId: "chat-ee464",
+      storageBucket: "chat-ee464.firebasestorage.app",
+      messagingSenderId: "967011465942",
+      appId: "1:967011465942:web:83b030b334275afc4c6777"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const user = localStorage.getItem("chat_user") || "Anonymous";
+    const chatBox = document.getElementById("chat");
+
+    // Show existing messages
+    db.ref("messages").on("child_added", (snapshot) => {
+      const msg = snapshot.val();
+      const div = document.createElement("div");
+      div.classList.add("msg");
+      div.innerHTML = `
+        <span class="user">${msg.user}</span>: ${msg.text}
+        <span class="time">${msg.time ? new Date(msg.time).toLocaleString() : ""}</span>
+      `;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // Update seen status for all unseen messages
+    db.ref("messages").once("value", snapshot => {
+      snapshot.forEach(child => {
+        const data = child.val();
+        if (!data.seen) {
+          db.ref("messages").child(child.key).update({ seen: true });
+        }
+      });
+    });
+
+    function sendMessage() {
+      const text = document.getElementById("message").value.trim();
+      if (!text) return;
+
+      db.ref("messages").push({
+        user,
+        text,
+        time: Date.now(),
+        seen: false
+      });
+
+      document.getElementById("message").value = "";
+    }
+  </script>
+</body>
+</html>
