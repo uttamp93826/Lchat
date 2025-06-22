@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; }
+  </style>
+</head>
+<body>
+  <h2>Sign Up</h2>
+  <input type="text" id="username" placeholder="Enter your name" />
+  <button onclick="signup()">Continue</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBP-uiChoUl6DExnwc9xvrCMj9Sbj72sg",
+      authDomain: "chat-ee464.firebaseapp.com",
+      databaseURL: "https://chat-ee464-default-rtdb.firebaseio.com",
+      projectId: "chat-ee464",
+      storageBucket: "chat-ee464.firebasestorage.app",
+      messagingSenderId: "967011465942",
+      appId: "1:967011465942:web:83b030b334275afc4c6777"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function signup() {
+      const name = document.getElementById("username").value.trim();
+
+      if (!name) {
+        alert("Please enter your name");
+        return;
+      }
+
+      localStorage.setItem("chat_user", name);
+      db.ref("users").push({ name });
+
+      if (name.toLowerCase().startsWith("estore@")) {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "chat.html";
+      }
+    }
+  </script>
+</body>
+</html>
